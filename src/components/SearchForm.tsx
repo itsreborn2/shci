@@ -3,13 +3,12 @@
 import { useState, useRef, KeyboardEvent } from 'react';
 
 interface SearchFormProps {
-  onSearch: (searchParams: { corporationName: string; corporationAddress: string; representativeName: string }) => void;
+  onSearch: (searchParams: { corporationName: string; representativeName: string }) => void;
   isLoading: boolean;
 }
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
   const [corporationName, setCorporationName] = useState('');
-  const [corporationAddress, setCorporationAddress] = useState('');
   const [representativeName, setRepresentativeName] = useState('');
   const [error, setError] = useState('');
 
@@ -17,19 +16,17 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
   const inputRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
   ];
 
   const handleSearch = () => {
-    const filledCount = [corporationName, corporationAddress, representativeName].filter(Boolean).length;
-
-    if (filledCount < 2) {
-      setError('최소 2개 이상의 검색어를 입력해야 합니다.');
+    // 업체명 또는 대표자명 중 하나는 필수로 입력하도록 유효성 검사를 수정합니다.
+    if (corporationName.trim() === '' && representativeName.trim() === '') {
+      setError('업체명 또는 대표자명 중 하나 이상을 입력해야 합니다.');
       return;
     }
 
     setError('');
-    onSearch({ corporationName, corporationAddress, representativeName });
+    onSearch({ corporationName, representativeName });
   };
 
   // Enter 키를 눌렀을 때의 동작을 처리하는 함수입니다.
@@ -63,18 +60,9 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
         <input
           ref={inputRefs[1]}
           type="text"
-          value={corporationAddress}
-          onChange={(e) => setCorporationAddress(e.target.value)}
-          onKeyDown={(e) => handleKeyDown(e, 1)}
-          placeholder="법인주소"
-          className="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
-        />
-        <input
-          ref={inputRefs[2]}
-          type="text"
           value={representativeName}
           onChange={(e) => setRepresentativeName(e.target.value)}
-          onKeyDown={(e) => handleKeyDown(e, 2)}
+          onKeyDown={(e) => handleKeyDown(e, 1)}
           placeholder="대표자명"
           className="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
         />
