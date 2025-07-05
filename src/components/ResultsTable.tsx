@@ -3,7 +3,7 @@
 // 검색 결과 데이터의 타입을 정의합니다.
 // PLAN.md에 명시된 모든 컬럼을 포함할 수 있도록 유연하게 설정합니다.
 interface Result {
-  [key: string]: any;
+  [key: string]: string | number | null;
 }
 
 interface ResultsTableProps {
@@ -39,7 +39,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
   }
 
   // 셀 데이터를 포맷하는 헬퍼 함수
-  const formatCell = (key: string, value: any) => {
+  const formatCell = (key: string, value: string | number | null) => {
     if (value === null || value === undefined || value === '') return '-';
 
     // URL을 클릭 가능한 링크로 만들기

@@ -7,7 +7,7 @@ import ResultsTable from '@/components/ResultsTable';
 
 // 검색 결과 데이터의 타입을 정의합니다.
 interface Result {
-  [key: string]: any;
+  [key: string]: string | number | null;
 }
 
 export default function Home() {
@@ -54,7 +54,7 @@ export default function Home() {
             setResults([]); // 결과 없음으로 처리
             return; // 함수 정상 종료
           }
-        } catch (e) {
+        } catch {
           // 파싱 실패 시, 일반 에러로 처리 (아래로 계속 진행)
         }
         
@@ -78,11 +78,13 @@ export default function Home() {
       
       setResults(finalResults);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof SyntaxError) {
         setError('서버로부터 받은 데이터 형식이 올바르지 않습니다.');
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        setError(err.message || '알 수 없는 오류가 발생했습니다.');
+        setError('알 수 없는 오류가 발생했습니다.');
       }
     } finally {
       setIsLoading(false);
