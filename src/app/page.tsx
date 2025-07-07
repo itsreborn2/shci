@@ -31,9 +31,7 @@ export default function Home() {
     setSearched(true);
 
     try {
-      // 보안 주석: n8n 웹훅 URL은 민감한 정보이므로 코드에 직접 노출하지 않습니다.
-      // .env.local 파일에 저장된 URL을 사용하며, 이 파일은 Git에 포함되지 않아 안전합니다.
-      const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || '';
+      const webhookUrl = 'https://moatai.app.n8n.cloud/webhook/266a0512-8fe7-4c6e-9a67-22df77f4b7e0';
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
