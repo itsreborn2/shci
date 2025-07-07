@@ -31,7 +31,7 @@ export default function Home() {
     setSearched(true);
 
     try {
-      const webhookUrl = 'https://moatai.app.n8n.cloud/webhook/266a0512-8fe7-4c6e-9a67-22df77f4b7e0';
+      const webhookUrl = 'https://n8n.boolio.co/webhook/266a0512-8fe7-4c6e-9a67-22df77f4b7e0';
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
