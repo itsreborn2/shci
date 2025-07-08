@@ -24,7 +24,7 @@ export default function Home() {
   };
 
   // 검색 실행 시 호출될 함수
-  const handleSearch = async (searchParams: { corporationName: string; representativeName: string }) => {
+  const handleSearch = async (searchParams: { corporationName: string; representativeName: string; corporationNumber: string; }) => {
     setIsLoading(true);
     setError('');
     setResults([]);
