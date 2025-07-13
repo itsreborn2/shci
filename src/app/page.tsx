@@ -60,10 +60,10 @@ export default function Home() {
   };
 
   // 검색 실행 시 호출될 함수
-  const handleSearch = async (searchParams: { corporationName: string; representativeName: string; corporationNumber: string; }) => {
+  const handleSearch = async (searchParams: { corporationName: string; representativeName: string; }) => {
     // (주) 및 공백 제거
     const cleanedCorporationName = searchParams.corporationName.replace(/\(주\)|주식회사|\s/g, '');
-    const cleanedSearchParams = { ...searchParams, corporationName: cleanedCorporationName };
+    const cleanedSearchParams = { ...searchParams, corporationName: cleanedCorporationName, corporationNumber: '' };
 
     // 첫 번째 API 로딩 상태 및 결과 초기화
     setIsLoading(true);

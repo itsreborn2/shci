@@ -33,8 +33,12 @@ export default function BoardList({ isAdmin }: BoardListProps) {
       }
 
       setPosts(data || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('알 수 없는 오류가 발생했습니다.');
+      }
     } finally {
       setLoading(false);
     }
@@ -76,8 +80,12 @@ export default function BoardList({ isAdmin }: BoardListProps) {
         // 비밀번호가 틀린 경우
         alert('비밀번호가 일치하지 않습니다.');
       }
-    } catch (err: any) {
-      alert(`오류가 발생했습니다: ${err.message}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`오류가 발생했습니다: ${err.message}`);
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -113,8 +121,12 @@ export default function BoardList({ isAdmin }: BoardListProps) {
       } else {
         alert('비밀번호가 일치하지 않습니다.');
       }
-    } catch (err: any) {
-      alert(`오류가 발생했습니다: ${err.message}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`오류가 발생했습니다: ${err.message}`);
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -128,8 +140,12 @@ export default function BoardList({ isAdmin }: BoardListProps) {
           alert('게시글이 삭제되었습니다.');
           fetchPosts();
           handleCloseDetail();
-        } catch (err: any) {
-          alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+        } catch (err) {
+          if (err instanceof Error) {
+            alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+          } else {
+            alert('삭제 중 알 수 없는 오류가 발생했습니다.');
+          }
         }
       }
       return;
@@ -152,8 +168,12 @@ export default function BoardList({ isAdmin }: BoardListProps) {
       } else {
         alert('비밀번호가 일치하지 않거나 삭제에 실패했습니다.');
       }
-    } catch (err: any) {
-      alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+      } else {
+        alert('삭제 중 알 수 없는 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -179,8 +199,12 @@ export default function BoardList({ isAdmin }: BoardListProps) {
       setPostToEdit(null);
       fetchPosts(); // 목록 새로고침
       alert(postId ? '게시글이 수정되었습니다.' : '게시글이 작성되었습니다.');
-    } catch (err: any) {
-      alert(`저장 중 오류가 발생했습니다: ${err.message}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`저장 중 오류가 발생했습니다: ${err.message}`);
+      } else {
+        alert('저장 중 알 수 없는 오류가 발생했습니다.');
+      }
     }
   };
 

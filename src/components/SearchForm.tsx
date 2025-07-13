@@ -3,14 +3,14 @@
 import { useState, useRef, KeyboardEvent } from 'react';
 
 interface SearchFormProps {
-  onSearch: (searchParams: { corporationName: string; representativeName: string; corporationNumber: string; }) => void;
+  onSearch: (searchParams: { corporationName: string; representativeName: string; /* corporationNumber: string; */ }) => void;
   isLoading: boolean;
 }
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
   const [corporationName, setCorporationName] = useState('');
   const [representativeName, setRepresentativeName] = useState('');
-  const [corporationNumber, setCorporationNumber] = useState('');
+  // const [corporationNumber, setCorporationNumber] = useState('');
   const [error, setError] = useState('');
 
   // 각 입력 필드에 대한 ref를 생성합니다.
@@ -28,7 +28,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
     }
 
     setError('');
-    onSearch({ corporationName, representativeName, corporationNumber });
+    onSearch({ corporationName, representativeName, /* corporationNumber */ });
   };
 
   // Enter 키를 눌렀을 때의 동작을 처리하는 함수입니다.

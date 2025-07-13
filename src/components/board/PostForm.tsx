@@ -13,8 +13,6 @@ interface PostFormProps {
 
 
 export default function PostForm({ onClose, onSave, postToEdit }: PostFormProps) {
-  const [name, setName] = useState('');
-  const [affiliation, setAffiliation] = useState('');
   const isEditing = !!postToEdit;
 
   const [formData, setFormData] = useState({
