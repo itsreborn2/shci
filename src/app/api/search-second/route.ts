@@ -20,17 +20,26 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      // n8n의 '결과 없음' 메시지인지 확인하고 정상 처리
-      if (data && data.message === "No item to return got found") {
-        return NextResponse.json([]);
+      // n8n에서 에러 응답이 왔을 때, 응답 본문을 텍스트로 우선 읽어봅니다.
+      const errorText = await response.text();
+      try {
+        // 텍스트가 JSON 형식이면 파싱합니다.
+        const errorData = JSON.parse(errorText);
+        // n8n의 '결과 없음' 메시지인지 확인하고 정상 처리
+        if (errorData && errorData.message === "No item to return got found") {
+          return NextResponse.json([]);
+        }
+        // 그 외의 JSON 에러는 그대로 전달
+        return NextResponse.json(errorData, { status: response.status });
+      } catch (e) {
+        // JSON 파싱 실패 시, 텍스트로 받은 에러 내용을 그대로 반환합니다.
+        return NextResponse.json({ error: 'n8n webhook returned non-JSON response', details: errorText }, { status: response.status });
       }
-      // 그 외의 에러는 그대로 전달
-      return NextResponse.json(data, { status: response.status });
     }
 
+    // 응답이 성공적인 경우
+    const data = await response.json();
     return NextResponse.json(data);
 
   } catch (error) {
