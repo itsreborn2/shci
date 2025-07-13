@@ -143,16 +143,16 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-gray-50 p-4 sm:p-8">
+    <main className="min-h-screen flex flex-col items-center bg-gray-50">
       <div className="w-full max-w-7xl relative">
-        <Link href="/board" className="absolute top-4 right-4 bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-cyan-700 transition-colors text-sm font-semibold z-10">
+        <Link href="/board" className="absolute top-4 right-4 bg-slate-500 text-white px-3 py-1.5 rounded-lg shadow-md hover:bg-slate-600 transition-colors text-sm font-semibold z-10">
           건의/오류 게시판
         </Link>
       
         <header className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 leading-tight">
             <span className="inline-block bg-cyan-100 text-cyan-800 text-sm font-semibold px-3 py-1.5 rounded-full mb-2">새한신용정보 직원 전용</span><br />
-            <span className="text-2xl sm:text-3xl font-semibold">전국 지자체 건설 수주 현황<br/><span className="text-base sm:text-lg font-medium text-gray-500">(현재 서울,경기 적용)</span></span>
+            <span className="text-2xl sm:text-3xl font-semibold">전국 지자체 수주 현황<br/><span className="text-base sm:text-lg font-medium text-gray-500">(현재 서울, 경기만 적용중)</span></span>
           </h1>
         </header>
 
