@@ -1,6 +1,6 @@
 'use client';
 
-import { Post } from './BoardList'; // BoardList에서 정의한 Post 타입을 가져옵니다.
+import { Post } from '@/types/board'; // Post 타입을 올바른 경로에서 가져옵니다.
 
 interface PostDetailProps {
   post: Post;
