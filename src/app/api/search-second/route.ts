@@ -32,7 +32,7 @@ export async function POST(request: Request) {
         }
         // 그 외의 JSON 에러는 그대로 전달
         return NextResponse.json(errorData, { status: response.status });
-      } catch (e) {
+      } catch (_e) {
         // JSON 파싱 실패 시, 텍스트로 받은 에러 내용을 그대로 반환합니다.
         return NextResponse.json({ error: 'n8n webhook returned non-JSON response', details: errorText }, { status: response.status });
       }
