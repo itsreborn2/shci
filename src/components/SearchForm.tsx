@@ -36,11 +36,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
     if (e.key === 'Enter') {
       e.preventDefault(); // 기본 폼 제출 동작을 막습니다.
 
-      if (index < inputRefs.length - 1) {
-        // 마지막 입력 필드가 아니면 다음 필드로 포커스를 이동합니다.
-        inputRefs[index + 1].current?.focus();
+      // 법인명 입력 필드(index=0)에서 엔터 키를 누르면 대표자명 필드로 이동
+      if (index === 0) {
+        inputRefs[1].current?.focus();
       } else {
-        // 마지막 입력 필드이면 검색을 실행합니다.
+        // 대표자명 입력 필드(index=1) 또는 그 이후에서 엔터 키를 누르면 바로 검색 실행
         handleSearch();
       }
     }

@@ -12,6 +12,7 @@ interface ResultsTableProps {
 }
 
 // 표시할 컬럼 헤더와 데이터 키를 매핑합니다.
+// 요청에 따라 추정금액(est_amt), 입찰률(bid_rate), 세부지역(district), 시작일(start_date), 종료일(end_date) 컬럼을 제거했습니다.
 const columns = [
   { header: '계약명', key: 'ctrt_name' },
   { header: '계약자', key: 'contractor' },
@@ -21,12 +22,7 @@ const columns = [
   { header: '부서', key: 'department' },
   { header: '지역', key: 'province' },
   { header: 'URL', key: 'url' }, // URL 컬럼 추가
-  { header: '세부지역', key: 'district' },
   { header: '계약 유형', key: 'ctrt_type' },
-  { header: '추정 금액', key: 'est_amt' },
-  { header: '입찰률', key: 'bid_rate' },
-  { header: '시작일', key: 'start_date' },
-  { header: '종료일', key: 'end_date' },
 ];
 
 const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
@@ -51,10 +47,6 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
       );
     }
 
-    // 날짜 형식 변경 (YYYY-MM-DD)
-    if ((key === 'start_date' || key === 'end_date') && typeof value === 'string') {
-      return value.substring(0, 10);
-    }
 
     // 계약 금액에 쉼표 추가
     if (key === 'ctrt_amt') {
@@ -72,7 +64,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
 
   return (
     <div className="w-full max-w-7xl mx-auto mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
-      <h3 className="text-xl font-bold mb-4 text-gray-700">검색 결과</h3>
+
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50">
