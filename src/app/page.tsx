@@ -59,7 +59,7 @@ export default function Home() {
     setIsAuthenticated(true);
   };
 
-  // 검색 실행 시 호출될 함수
+  // 검색 실행 시 호출될 함수 (새 배포 트리거)
   const handleSearch = async (searchParams: { corporationName: string; representativeName: string; }) => {
     // (주) 및 공백 제거
     const cleanedCorporationName = searchParams.corporationName.replace(/\(주\)|주식회사|\s/g, '');
