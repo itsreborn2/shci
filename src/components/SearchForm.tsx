@@ -5,9 +5,10 @@ import { useState, useRef, KeyboardEvent } from 'react';
 interface SearchFormProps {
   onSearch: (searchParams: { corporationName: string; representativeName: string; /* corporationNumber: string; */ }) => void;
   isLoading: boolean;
+  isSearching: boolean; // 두 검색 API 모두 완료될 때까지 검색을 비활성화하는 통합 플래그
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, isSearching }) => {
   const [corporationName, setCorporationName] = useState('');
   const [representativeName, setRepresentativeName] = useState('');
   // const [corporationNumber, setCorporationNumber] = useState('');
@@ -57,7 +58,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
           onChange={(e) => setCorporationName(e.target.value)}
           onKeyDown={(e) => handleKeyDown(e, 0)}
           placeholder="법인명"
-          className="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
+          disabled={isSearching} // 검색 중 입력을 비활성화
+          lang="ko" // 한글 입력 모드 기본 설정
+          inputMode="text" // 모바일에서 적절한 키보드 표시
+          autoComplete="off" // 이전 영어 입력 값 자동완성 방지
+          className="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
         />
         <input
           ref={inputRefs[1]}
@@ -66,7 +71,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
           onChange={(e) => setRepresentativeName(e.target.value)}
           onKeyDown={(e) => handleKeyDown(e, 1)}
           placeholder="대표자명"
-          className="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
+          disabled={isSearching} // 검색 중 입력을 비활성화
+          lang="ko" // 한글 입력 모드 기본 설정
+          inputMode="text" // 모바일에서 적절한 키보드 표시
+          autoComplete="off" // 이전 영어 입력 값 자동완성 방지
+          className="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
         />
         {/* 법인번호 입력 필드 숨김 처리 - 필요시 주석 해제하여 사용 가능합니다 */}
         {/* <input
@@ -82,10 +91,10 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
       {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
       <button
         onClick={handleSearch}
-        disabled={isLoading}
+        disabled={isSearching} // isLoading 대신 isSearching 사용
         className="w-full mt-6 bg-cyan-500 text-white font-semibold py-2.5 rounded-lg hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {isLoading ? '검색 중...' : '검색'}
+        {isSearching ? '검색 중...' : '검색'}
       </button>
     </div>
   );

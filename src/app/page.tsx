@@ -39,8 +39,15 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const [secondResults, setSecondResults] = useState<Result[]>([]); // 두 번째 엔드포인트 결과
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // 각 API의 로딩 상태
+  const [isLoading, setIsLoading] = useState(false); // 첨 번째 API 로딩 상태
   const [secondIsLoading, setSecondIsLoading] = useState(false); // 두 번째 엔드포인트 로딩 상태
+  
+  // 통합 검색 상태 - 두 API 모두 완료될 때까지 검색이 비활성화됨
+  // 이 플래그가 true일 경우 추가 검색을 방지하여 데이터가 엇기는 문제 해결
+  const [isSearching, setIsSearching] = useState(false);
+  
   const [error, setError] = useState('');
   const [secondError, setSecondError] = useState(''); // 두 번째 엔드포인트 오류 상태
   const [searched, setSearched] = useState(false); // 검색 실행 여부 상태
@@ -61,10 +68,18 @@ export default function Home() {
 
   // 검색 실행 시 호출될 함수 (새 배포 트리거)
   const handleSearch = async (searchParams: { corporationName: string; representativeName: string; }) => {
+    // 검색 중일 경우 추가 검색 방지
+    if (isSearching) {
+      return;
+    }
+    
     // (주) 및 공백 제거
     const cleanedCorporationName = searchParams.corporationName.replace(/\(주\)|주식회사|\s/g, '');
     const cleanedSearchParams = { ...searchParams, corporationName: cleanedCorporationName, corporationNumber: '' };
 
+    // 통합 검색 상태 설정
+    setIsSearching(true);
+    
     // 첫 번째 API 로딩 상태 및 결과 초기화
     setIsLoading(true);
     setError('');
@@ -111,6 +126,11 @@ export default function Home() {
       setError(`첫 번째 API: ${message}`);
     } finally {
       setIsLoading(false);
+      
+      // 두 API 모두 완료 시 isSearching 상태 업데이트
+      if (!secondIsLoading) {
+        setIsSearching(false);
+      }
     }
   };
   
@@ -139,6 +159,11 @@ export default function Home() {
       setSecondError(`두 번째 API: ${message}`);
     } finally {
       setSecondIsLoading(false);
+      
+      // 두 API 모두 완료 시 isSearching 상태 업데이트
+      if (!isLoading) {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -160,7 +185,7 @@ export default function Home() {
           <PasswordModal onSuccess={handleAuthSuccess} />
         ) : (
           <div className="w-full">
-            <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+            <SearchForm onSearch={handleSearch} isLoading={isLoading} isSearching={isSearching} />
             
             {/* 첫 번째 API 결과 관련 */}
             {error && <p className="text-center text-red-500 mt-4">오류: {error}</p>}
