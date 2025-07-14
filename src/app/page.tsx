@@ -185,7 +185,7 @@ export default function Home() {
           <PasswordModal onSuccess={handleAuthSuccess} />
         ) : (
           <div className="w-full">
-            <SearchForm onSearch={handleSearch} isLoading={isLoading} isSearching={isSearching} />
+            <SearchForm onSearch={handleSearch} isSearching={isSearching} />
             
             {/* 첫 번째 API 결과 관련 */}
             {error && <p className="text-center text-red-500 mt-4">오류: {error}</p>}

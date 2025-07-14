@@ -4,11 +4,10 @@ import { useState, useRef, KeyboardEvent } from 'react';
 
 interface SearchFormProps {
   onSearch: (searchParams: { corporationName: string; representativeName: string; /* corporationNumber: string; */ }) => void;
-  isLoading: boolean;
   isSearching: boolean; // 두 검색 API 모두 완료될 때까지 검색을 비활성화하는 통합 플래그
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, isSearching }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching }) => {
   const [corporationName, setCorporationName] = useState('');
   const [representativeName, setRepresentativeName] = useState('');
   // const [corporationNumber, setCorporationNumber] = useState('');
