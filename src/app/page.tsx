@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import PasswordModal from '@/components/PasswordModal';
 import SearchForm from '@/components/SearchForm';
 import ResultsTable from '@/components/ResultsTable';
+import Spinner from '@/components/Spinner';
+import WelcomeGuide from '@/components/WelcomeGuide';
 import Link from 'next/link';
 
 // 간단한 마크다운을 HTML로 변환하는 함수
@@ -39,6 +41,8 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const [secondResults, setSecondResults] = useState<Result[]>([]); // 두 번째 엔드포인트 결과
+  const [ongoingResults, setOngoingResults] = useState<Result[]>([]); // 진행중인 공사 결과
+  const [completedResults, setCompletedResults] = useState<Result[]>([]); // 완료된 공사 결과
   
   // 각 API의 로딩 상태
   const [isLoading, setIsLoading] = useState(false); // 첨 번째 API 로딩 상태
@@ -59,6 +63,40 @@ export default function Home() {
       setIsAuthenticated(true);
     }
   }, []); // 빈 배열을 전달하여 컴포넌트가 마운트될 때 한 번만 실행
+
+  // 두 API의 로딩 상태가 모두 변경될 때 isSearching 상태를 업데이트
+  useEffect(() => {
+    if (!isLoading && !secondIsLoading) {
+      setIsSearching(false);
+    }
+  }, [isLoading, secondIsLoading]);
+
+  // API 결과가 변경될 때마다 진행중/완료된 공사를 필터링
+  useEffect(() => {
+    if (results.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // 날짜 비교를 위해 시간은 0으로 설정
+
+      const ongoing = results.filter(result => {
+        if (!result.end_date || typeof result.end_date !== 'string') return true; // 종료일이 없으면 진행중으로 간주
+        const endDate = new Date(result.end_date);
+        return endDate >= today;
+      });
+
+      const completed = results.filter(result => {
+        if (!result.end_date || typeof result.end_date !== 'string') return false; // 종료일이 없으면 완료될 수 없음
+        const endDate = new Date(result.end_date);
+        return endDate < today;
+      });
+
+      setOngoingResults(ongoing);
+      setCompletedResults(completed);
+    } else {
+      // 검색 결과가 없으면 둘 다 비움
+      setOngoingResults([]);
+      setCompletedResults([]);
+    }
+  }, [results]);
 
   // 비밀번호 인증 성공 시 호출될 함수
   const handleAuthSuccess = () => {
@@ -105,7 +143,7 @@ export default function Home() {
   // 첫 번째 API 호출 함수
   const fetchFirstAPI = async (searchParams: { corporationName: string; representativeName: string; corporationNumber: string; }) => {
     try {
-      const response = await fetch('/api/search-first', {
+              const response = await fetch('/api/search-first', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,10 +165,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
       
-      // 두 API 모두 완료 시 isSearching 상태 업데이트
-      if (!secondIsLoading) {
-        setIsSearching(false);
-      }
+
     }
   };
   
@@ -160,10 +195,7 @@ export default function Home() {
     } finally {
       setSecondIsLoading(false);
       
-      // 두 API 모두 완료 시 isSearching 상태 업데이트
-      if (!isLoading) {
-        setIsSearching(false);
-      }
+
     }
   };
 
@@ -186,54 +218,53 @@ export default function Home() {
         ) : (
           <div className="w-full">
             <SearchForm onSearch={handleSearch} isSearching={isSearching} />
-            
-            {/* 첫 번째 API 결과 관련 */}
-            {error && <p className="text-center text-red-500 mt-4">오류: {error}</p>}
-            
-            {/* 첫 번째 API: 로딩 중이거나 결과가 있을 때만 테이블 표시 */}
-            {(isLoading || results.length > 0) && (
-              <div>
-                <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">수주 검색 결과</h2>
-                <ResultsTable results={results} isLoading={isLoading} />
-              </div>
-            )}
 
-            {/* 두 번째 API 결과 관련 */}
-            {secondError && <p className="text-center text-red-500 mt-4">오류: {secondError}</p>}
-            
-            {/* 두 번째 API: 로딩 중이거나 결과가 있을 때만 테이블 표시 */}
-            {(secondIsLoading || secondResults.length > 0) && (
-              <div>
-                <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">기업 검색 결과</h2>
-                <div className="w-full max-w-7xl mx-auto mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+            {!searched ? (
+              <WelcomeGuide />
+            ) : (
+              <>
+                {/* 첫 번째 API 결과 관련 */}
+                {error && <p className="text-center text-red-500 mt-4">오류: {error}</p>}
 
-                  {secondIsLoading ? (
-                    <div className="text-center py-4">
-                      <p className="text-gray-500">검색 중...</p>
-                    </div>
-                  ) : secondResults.length > 0 ? (
-                    <div className="prose max-w-none text-gray-900">
-                      {secondResults.map((result, index) => (
-                        <div key={index} dangerouslySetInnerHTML={{ __html: markdownToHtml(result.content as string) }} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-gray-500">결과가 없습니다.</p>
-                    </div>
-                  )}
+                {/* 진행중인 공사 결과 섹션 */}
+                <div>
+                  <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">수주 검색 결과 (진행중인 공사)</h2>
+                  <ResultsTable results={ongoingResults} isLoading={isLoading} />
                 </div>
-              </div>
+
+                {/* 완료된 수주 검색 결과 섹션 */}
+                <div>
+                  <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">완료된 수주 검색 결과</h2>
+                  <ResultsTable results={completedResults} isLoading={isLoading} />
+                </div>
+
+                {/* 두 번째 API 결과 관련 */}
+                {secondError && <p className="text-center text-red-500 mt-4">오류: {secondError}</p>}
+
+                {/* 두 번째 API 결과 섹션 */}
+                <div className="mb-16">
+                  <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">AI 기업 리서치 결과</h2>
+                  <p className="text-center text-sm text-gray-500 -mt-2 mb-4">기업에 따라 1~2분 가량 소요될 수 있습니다.</p>
+                  <div className="w-full max-w-7xl mx-auto mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                    {secondIsLoading ? (
+                      <Spinner />
+                    ) : secondResults.length > 0 ? (
+                      <div className="prose max-w-none text-gray-900">
+                        {secondResults.map((result, index) => (
+                          <div key={index} dangerouslySetInnerHTML={{ __html: markdownToHtml(result.content as string) }} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-gray-500">검색 결과가 없습니다.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
 
-                    {/* 두 API 모두 검색 후 로딩이 끝났고, 에러가 없으며, 결과가 없을 때 메시지 표시 */}
-            {searched && !isLoading && !secondIsLoading && !error && !secondError && 
-              results.length === 0 && secondResults.length === 0 && (
-              <div className="text-center mt-8 p-8 bg-white rounded-lg shadow-md">
-                <p className="text-lg font-semibold text-gray-700">검색 결과가 없습니다.</p>
-                <p className="text-gray-500 mt-2">다른 검색어로 다시 시도해 주세요.</p>
-              </div>
-            )}
+
           </div>
         )}
       </div>

@@ -1,5 +1,7 @@
 'use client';
 
+import Spinner from './Spinner';
+
 // 검색 결과 데이터의 타입을 정의합니다.
 // PLAN.md에 명시된 모든 컬럼을 포함할 수 있도록 유연하게 설정합니다.
 interface Result {
@@ -21,13 +23,12 @@ const columns = [
   { header: '계약 기간', key: 'ctrt_period' },
   { header: '부서', key: 'department' },
   { header: '지역', key: 'province' },
-  { header: 'URL', key: 'url' }, // URL 컬럼 추가
   { header: '계약 유형', key: 'ctrt_type' },
 ];
 
 const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
   if (isLoading) {
-    return <div className="text-center p-8 text-gray-500 dark:text-gray-400">검색 중...</div>;
+    return <Spinner />;
   }
 
   if (results.length === 0) {
@@ -37,15 +38,6 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
   // 셀 데이터를 포맷하는 헬퍼 함수
   const formatCell = (key: string, value: string | number | null) => {
     if (value === null || value === undefined || value === '') return '-';
-
-    // URL을 클릭 가능한 링크로 만들기
-    if (key === 'url' && typeof value === 'string' && value.startsWith('http')) {
-      return (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:text-cyan-700 hover:underline">
-          보기
-        </a>
-      );
-    }
 
 
     // 계약 금액에 쉼표 추가
