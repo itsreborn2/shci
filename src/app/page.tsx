@@ -209,7 +209,7 @@ export default function Home() {
         <header className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 leading-tight">
             <span className="inline-block bg-cyan-100 text-cyan-800 text-sm font-semibold px-3 py-1.5 rounded-full mb-2">새한신용정보 직원 전용</span><br />
-            <span className="text-2xl sm:text-3xl font-semibold">전국 지자체 수주 현황<br/><span className="text-base sm:text-lg font-medium text-gray-500">(현재 서울, 경기만 적용중)</span></span>
+            <span className="text-2xl sm:text-3xl font-semibold">전국 지자체 건설수주 현황 및 기업 리서치<br/><span className="text-base sm:text-lg font-medium text-gray-500">(현재 서울, 경기만 적용중)</span></span>
           </h1>
         </header>
 
