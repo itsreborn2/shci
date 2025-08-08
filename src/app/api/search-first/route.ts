@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server';
 
+// n8n 특유의 래핑 응답과 에러 아이템을 식별하기 위한 타입/타입가드
+type N8nWrapped<T> = { value: T[]; Count?: number };
+type N8nErrorItem = { message: string; error: unknown };
+
+function hasArrayValue(obj: unknown): obj is { value: unknown } {
+  return typeof obj === 'object' && obj !== null && 'value' in obj;
+}
+
+function isErrorItem(item: unknown): item is N8nErrorItem {
+  return typeof item === 'object' && item !== null && 'message' in item && 'error' in item;
+}
+
 export async function POST(request: Request) {
   const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
 
@@ -22,34 +34,40 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
+    const data: unknown = await response.json();
 
     if (!response.ok) {
       // n8n의 '결과 없음' 메시지인지 확인하고 정상 처리
-      if (data && data.message === "No item to return got found") {
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        (data as { message?: unknown }).message === 'No item to return got found'
+      ) {
         return NextResponse.json([]);
       }
       // 그 외의 에러는 그대로 전달
-      return NextResponse.json(data, { status: response.status });
+      return NextResponse.json(data as object, { status: response.status });
     }
 
     // n8n이 에러를 value 배열 안에 담아 200으로 반환하는 케이스 방어
     // 형태: { value: [ { message: string, error: {...} } ], Count: number }
-    if (data && typeof data === 'object' && Array.isArray((data as any).value)) {
-      const value = (data as any).value;
-      if (value.length > 0) {
+    if (hasArrayValue(data)) {
+      const wrapped = data as N8nWrapped<unknown>;
+      const value = wrapped.value;
+      if (Array.isArray(value) && value.length > 0) {
         const first = value[0];
-        if (first && typeof first === 'object' && 'message' in first && 'error' in first) {
+        if (isErrorItem(first)) {
           // 에러 메시지 추출하여 502로 전달
-          const msg = String((first as any).message || 'Upstream error');
+          const msg = typeof first.message === 'string' ? first.message : 'Upstream error';
           return NextResponse.json({ error: msg }, { status: 502 });
         }
       }
       // value가 정상 데이터면 언래핑하여 반환
-      return NextResponse.json(value);
+      return NextResponse.json(value as unknown[]);
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data as unknown);
 
   } catch (error) {
     console.error('API Route Error:', error);

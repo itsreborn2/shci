@@ -146,19 +146,20 @@ export default function Home() {
   // 첫 번째 API 호출 함수
   const fetchFirstAPI = async (searchParams: { corporationName: string; representativeName: string; corporationNumber: string; }) => {
     // 응답을 신규 스키마에 맞게 표준화하는 헬퍼
-    const normalizeItem = (item: Record<string, any>) => {
+    const normalizeItem = (item: unknown) => {
       // 주의: 기존 키(ctrt_name 등)와 신규 키가 혼재할 수 있어, 우선순위에 따라 병합합니다.
-      const region_name = item.region_name ?? item.province ?? null;
-      const category = item.category ?? item.ctrt_type ?? null;
-      const contract_name = item.contract_name ?? item.ctrt_name ?? null;
-      const agency_name = item.agency_name ?? item.department ?? null;
-      const contract_amount = item.contract_amount ?? item.ctrt_amt ?? null;
-      const contractor = item.contractor ?? null;
-      const representative = item.representative ?? null;
-      const contract_date = item.contract_date ?? item.start_date ?? null;
-      const completion_date = item.completion_date ?? item.end_date ?? null;
+      const o: Record<string, unknown> = (typeof item === 'object' && item !== null) ? (item as Record<string, unknown>) : {};
+      const region_name = (o['region_name'] ?? o['province'] ?? null) as string | null;
+      const category = (o['category'] ?? o['ctrt_type'] ?? null) as string | null;
+      const contract_name = (o['contract_name'] ?? o['ctrt_name'] ?? null) as string | null;
+      const agency_name = (o['agency_name'] ?? o['department'] ?? null) as string | null;
+      const contract_amount = (o['contract_amount'] ?? o['ctrt_amt'] ?? null) as number | string | null;
+      const contractor = (o['contractor'] ?? null) as string | null;
+      const representative = (o['representative'] ?? null) as string | null;
+      const contract_date = (o['contract_date'] ?? o['start_date'] ?? null) as string | null;
+      const completion_date = (o['completion_date'] ?? o['end_date'] ?? null) as string | null;
       // 새로 추가된 광역 단위(도/시) 필드 - 그대로 보존하여 테이블에서 "도시"로 표시합니다.
-      const province = item.province ?? null;
+      const province = (o['province'] ?? null) as string | null;
 
       return {
         region_name,
@@ -192,20 +193,22 @@ export default function Home() {
 
       // n8n이 { value: [...] , Count: n } 형태로 응답하는 경우를 언래핑하고,
       // value 안에 에러 객체가 담긴 경우를 감지해 에러로 처리합니다.
-      let payload: any = data;
-      if (payload && typeof payload === 'object' && Array.isArray(payload.value)) {
-        payload = payload.value;
+      let payload: unknown = data;
+      const hasValueArray = (u: unknown): u is { value: unknown[] } =>
+        typeof u === 'object' && u !== null && 'value' in u && Array.isArray((u as { value?: unknown }).value);
+      const isErrorItem = (u: unknown): u is { message: string; error: unknown } =>
+        typeof u === 'object' && u !== null && 'message' in u && typeof (u as { message?: unknown }).message === 'string' && 'error' in u;
+
+      if (hasValueArray(payload)) {
+        payload = (payload as { value: unknown[] }).value;
       }
-      if (Array.isArray(payload) && payload.length > 0) {
-        const first = payload[0];
-        if (first && typeof first === 'object' && 'message' in first && 'error' in first) {
-          throw new Error(String((first as any).message || '업스트림 에러'));
-        }
+      const arr: unknown[] = Array.isArray(payload) ? (payload as unknown[]) : [payload];
+      if (arr.length > 0 && isErrorItem(arr[0])) {
+        throw new Error(arr[0].message || '업스트림 에러');
       }
 
       // 표준화된 스키마로 변환하여 저장
-      const arrayData: Record<string, any>[] = Array.isArray(payload) ? payload : [payload];
-      const normalized = arrayData.map(normalizeItem);
+      const normalized = arr.map(normalizeItem);
       setResults(normalized);
 
     } catch (err: unknown) {
