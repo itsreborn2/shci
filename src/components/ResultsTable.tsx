@@ -18,25 +18,26 @@ interface ResultsTableProps {
 // 매핑:
 //  - 도시: province
 //  - 지역: region_name
-//  - 계약유형: category
-//  - 계약명: contract_name
-//  - 부서: agency_name
-//  - 계약금액: contract_amount (천 단위 콤마)
 //  - 계약자: contractor
 //  - 대표자: representative
+//  - 계약유형: category
+//  - 계약금액: contract_amount (천 단위 콤마)
 //  - 계약날짜: contract_date (YYYY-MM-DD)
 //  - 완료날짜: completion_date (YYYY-MM-DD)
+//  - 계약명: contract_name
+//  - 부서: agency_name
+// 표시 순서: 도시,지역,계약자,대표자,계약유형,계약금액,계약날짜,완료날짜,계약명,부서
 const columns = [
   { header: '도시', key: 'province' },
   { header: '지역', key: 'region_name' },
-  { header: '계약유형', key: 'category' },
-  { header: '계약명', key: 'contract_name' },
-  { header: '부서', key: 'agency_name' },
-  { header: '계약금액', key: 'contract_amount' },
   { header: '계약자', key: 'contractor' },
   { header: '대표자', key: 'representative' },
+  { header: '계약유형', key: 'category' },
+  { header: '계약금액', key: 'contract_amount' },
   { header: '계약날짜', key: 'contract_date' },
   { header: '완료날짜', key: 'completion_date' },
+  { header: '계약명', key: 'contract_name' },
+  { header: '부서', key: 'agency_name' },
 ];
 
 const ResultsTable: React.FC<ResultsTableProps> = ({ results, isLoading }) => {
