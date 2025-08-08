@@ -149,7 +149,17 @@ export default function Home() {
     const normalizeItem = (item: unknown) => {
       // 주의: 기존 키(ctrt_name 등)와 신규 키가 혼재할 수 있어, 우선순위에 따라 병합합니다.
       const o: Record<string, unknown> = (typeof item === 'object' && item !== null) ? (item as Record<string, unknown>) : {};
-      const region_name = (o['region_name'] ?? o['province'] ?? null) as string | null;
+      // 새로 추가된 광역 단위(도/시) 필드 - 그대로 보존하여 테이블에서 "도시"로 표시합니다.
+      const province = (o['province'] ?? null) as string | null;
+
+      // 지역(region_name) 정규화 규칙
+      // - 백엔드 값이 null/빈문자열이면 null로 표준화
+      // - 값이 존재하면 그대로 통과 (province와 동일하더라도 변경하지 않음)
+      let region_name: string | null = null;
+      if (typeof o['region_name'] === 'string') {
+        const rn = (o['region_name'] as string).trim();
+        region_name = rn === '' ? null : rn;
+      }
       const category = (o['category'] ?? o['ctrt_type'] ?? null) as string | null;
       const contract_name = (o['contract_name'] ?? o['ctrt_name'] ?? null) as string | null;
       const agency_name = (o['agency_name'] ?? o['department'] ?? null) as string | null;
@@ -158,8 +168,6 @@ export default function Home() {
       const representative = (o['representative'] ?? null) as string | null;
       const contract_date = (o['contract_date'] ?? o['start_date'] ?? null) as string | null;
       const completion_date = (o['completion_date'] ?? o['end_date'] ?? null) as string | null;
-      // 새로 추가된 광역 단위(도/시) 필드 - 그대로 보존하여 테이블에서 "도시"로 표시합니다.
-      const province = (o['province'] ?? null) as string | null;
 
       return {
         region_name,
