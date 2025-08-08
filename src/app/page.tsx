@@ -77,16 +77,19 @@ export default function Home() {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // 날짜 비교를 위해 시간은 0으로 설정
 
+      // 신규 스키마: 완료 기준은 completion_date 사용
       const ongoing = results.filter(result => {
-        if (!result.end_date || typeof result.end_date !== 'string') return true; // 종료일이 없으면 진행중으로 간주
-        const endDate = new Date(result.end_date);
-        return endDate >= today;
+        const comp = result.completion_date as string | undefined;
+        if (!comp || typeof comp !== 'string') return true; // 완료일이 없으면 진행중으로 간주
+        const compDate = new Date(comp);
+        return compDate >= today;
       });
 
       const completed = results.filter(result => {
-        if (!result.end_date || typeof result.end_date !== 'string') return false; // 종료일이 없으면 완료될 수 없음
-        const endDate = new Date(result.end_date);
-        return endDate < today;
+        const comp = result.completion_date as string | undefined;
+        if (!comp || typeof comp !== 'string') return false; // 완료일이 없으면 완료로 분류하지 않음
+        const compDate = new Date(comp);
+        return compDate < today;
       });
 
       setOngoingResults(ongoing);
@@ -142,6 +145,36 @@ export default function Home() {
   // 첫 번째 API 호출 함수
   // 첫 번째 API 호출 함수
   const fetchFirstAPI = async (searchParams: { corporationName: string; representativeName: string; corporationNumber: string; }) => {
+    // 응답을 신규 스키마에 맞게 표준화하는 헬퍼
+    const normalizeItem = (item: Record<string, any>) => {
+      // 주의: 기존 키(ctrt_name 등)와 신규 키가 혼재할 수 있어, 우선순위에 따라 병합합니다.
+      const region_name = item.region_name ?? item.province ?? null;
+      const category = item.category ?? item.ctrt_type ?? null;
+      const contract_name = item.contract_name ?? item.ctrt_name ?? null;
+      const agency_name = item.agency_name ?? item.department ?? null;
+      const contract_amount = item.contract_amount ?? item.ctrt_amt ?? null;
+      const contractor = item.contractor ?? null;
+      const representative = item.representative ?? null;
+      const contract_date = item.contract_date ?? item.start_date ?? null;
+      const completion_date = item.completion_date ?? item.end_date ?? null;
+      // 새로 추가된 광역 단위(도/시) 필드 - 그대로 보존하여 테이블에서 "도시"로 표시합니다.
+      const province = item.province ?? null;
+
+      return {
+        region_name,
+        category,
+        contract_name,
+        agency_name,
+        contract_amount,
+        contractor,
+        representative,
+        contract_date,
+        completion_date,
+        // 결과 객체에 province 포함 (ResultsTable의 "도시" 컬럼에서 사용)
+        province,
+      } as Result;
+    };
+
     try {
               const response = await fetch('/api/search-first', {
         method: 'POST',
@@ -157,7 +190,23 @@ export default function Home() {
         throw new Error(data.error || '첫 번째 API에서 데이터를 가져오는 데 실패했습니다.');
       }
 
-      setResults(Array.isArray(data) ? data : [data]);
+      // n8n이 { value: [...] , Count: n } 형태로 응답하는 경우를 언래핑하고,
+      // value 안에 에러 객체가 담긴 경우를 감지해 에러로 처리합니다.
+      let payload: any = data;
+      if (payload && typeof payload === 'object' && Array.isArray(payload.value)) {
+        payload = payload.value;
+      }
+      if (Array.isArray(payload) && payload.length > 0) {
+        const first = payload[0];
+        if (first && typeof first === 'object' && 'message' in first && 'error' in first) {
+          throw new Error(String((first as any).message || '업스트림 에러'));
+        }
+      }
+
+      // 표준화된 스키마로 변환하여 저장
+      const arrayData: Record<string, any>[] = Array.isArray(payload) ? payload : [payload];
+      const normalized = arrayData.map(normalizeItem);
+      setResults(normalized);
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';

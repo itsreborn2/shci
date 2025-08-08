@@ -15,7 +15,9 @@ export async function POST(request: Request) {
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        // UTF-8 명시로 한글이 물음표(????)로 깨지는 문제 방지
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(body),
     });
@@ -29,6 +31,22 @@ export async function POST(request: Request) {
       }
       // 그 외의 에러는 그대로 전달
       return NextResponse.json(data, { status: response.status });
+    }
+
+    // n8n이 에러를 value 배열 안에 담아 200으로 반환하는 케이스 방어
+    // 형태: { value: [ { message: string, error: {...} } ], Count: number }
+    if (data && typeof data === 'object' && Array.isArray((data as any).value)) {
+      const value = (data as any).value;
+      if (value.length > 0) {
+        const first = value[0];
+        if (first && typeof first === 'object' && 'message' in first && 'error' in first) {
+          // 에러 메시지 추출하여 502로 전달
+          const msg = String((first as any).message || 'Upstream error');
+          return NextResponse.json({ error: msg }, { status: 502 });
+        }
+      }
+      // value가 정상 데이터면 언래핑하여 반환
+      return NextResponse.json(value);
     }
 
     return NextResponse.json(data);
