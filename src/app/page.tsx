@@ -55,6 +55,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [secondError, setSecondError] = useState(''); // 두 번째 엔드포인트 오류 상태
   const [searched, setSearched] = useState(false); // 검색 실행 여부 상태
+  const [integratedMode, setIntegratedMode] = useState(false); // 통합 검색 여부 (AI 섹션 노출 제어)
 
   // 페이지 로드 시 sessionStorage에서 인증 상태 확인
   useEffect(() => {
@@ -107,36 +108,59 @@ export default function Home() {
     setIsAuthenticated(true);
   };
 
-  // 검색 실행 시 호출될 함수 (새 배포 트리거)
+  // 검색 실행 시 호출될 함수들
+  // 1) DB 전용 검색: 첫 번째 API만 호출하며 AI 섹션은 숨김
   const handleSearch = async (searchParams: { corporationName: string; representativeName: string; }) => {
-    // 검색 중일 경우 추가 검색 방지
-    if (isSearching) {
-      return;
-    }
-    
     // (주) 및 공백 제거
     const cleanedCorporationName = searchParams.corporationName.replace(/\(주\)|주식회사|\s/g, '');
     const cleanedSearchParams = { ...searchParams, corporationName: cleanedCorporationName, corporationNumber: '' };
 
-    // 통합 검색 상태 설정
-    setIsSearching(true);
-    
+    // 통합 모드 끄기 (AI 섹션 비노출)
+    setIntegratedMode(false);
+    setIsSearching(false); // 폼 비활성화는 통합 검색에서만 사용
+
     // 첫 번째 API 로딩 상태 및 결과 초기화
     setIsLoading(true);
     setError('');
     setResults([]);
-    
-    // 두 번째 API 로딩 상태 및 결과 초기화
+
+    // 두 번째 API 상태는 초기화하되 로딩은 걸지 않음
+    setSecondIsLoading(false);
+    setSecondError('');
+    setSecondResults([]);
+
+    setSearched(true);
+
+    // 첫 번째 API 호출 (DB 검색)
+    fetchFirstAPI(cleanedSearchParams);
+  };
+
+  // 2) AI 통합 검색: 두 API를 병행 호출하며 완료까지 폼 비활성화
+  const handleSearchAI = async (searchParams: { corporationName: string; representativeName: string; }) => {
+    // 이미 통합 검색이 진행 중이면 무시
+    if (isSearching) return;
+
+    // (주) 및 공백 제거
+    const cleanedCorporationName = searchParams.corporationName.replace(/\(주\)|주식회사|\s/g, '');
+    const cleanedSearchParams = { ...searchParams, corporationName: cleanedCorporationName, corporationNumber: '' };
+
+    setIntegratedMode(true);
+    setIsSearching(true); // 통합 검색 중 폼 비활성화
+
+    // 첫 번째 API 초기화
+    setIsLoading(true);
+    setError('');
+    setResults([]);
+
+    // 두 번째 API 초기화
     setSecondIsLoading(true);
     setSecondError('');
     setSecondResults([]);
-    
+
     setSearched(true);
 
-    // 첫 번째 API 호출
+    // 두 API 병렬 호출
     fetchFirstAPI(cleanedSearchParams);
-    
-    // 두 번째 API 호출
     fetchSecondAPI(cleanedSearchParams);
   };
   
@@ -269,7 +293,7 @@ export default function Home() {
         <header className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 leading-tight">
             <span className="inline-block bg-cyan-100 text-cyan-800 text-sm font-semibold px-3 py-1.5 rounded-full mb-2">새한신용정보 직원 전용</span><br />
-            <span className="text-2xl sm:text-3xl font-semibold">전국 지자체 건설수주 현황 및 기업 리서치<br/><span className="text-base sm:text-lg font-medium text-gray-500">(현재 서울, 경기만 적용중)</span></span>
+            <span className="text-2xl sm:text-3xl font-semibold">전국 지자체 공사,물품,용역 수주 현황 및 AI리서치<br/><span className="text-base sm:text-lg font-medium text-gray-500">(현재 서울, 경기만 적용중)</span></span>
           </h1>
         </header>
 
@@ -277,7 +301,7 @@ export default function Home() {
           <PasswordModal onSuccess={handleAuthSuccess} />
         ) : (
           <div className="w-full">
-            <SearchForm onSearch={handleSearch} isSearching={isSearching} />
+            <SearchForm onSearch={handleSearch} onSearchAI={handleSearchAI} isSearching={isSearching} />
 
             {!searched ? (
               <WelcomeGuide />
@@ -301,26 +325,28 @@ export default function Home() {
                 {/* 두 번째 API 결과 관련 */}
                 {secondError && <p className="text-center text-red-500 mt-4">오류: {secondError}</p>}
 
-                {/* 두 번째 API 결과 섹션 */}
-                <div className="mb-16">
-                  <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">AI 기업 리서치 결과</h2>
-                  <p className="text-center text-sm text-gray-500 -mt-2 mb-4">기업에 따라 1~2분 가량 소요될 수 있습니다.</p>
-                  <div className="w-full max-w-7xl mx-auto mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
-                    {secondIsLoading ? (
-                      <Spinner />
-                    ) : secondResults.length > 0 ? (
-                      <div className="prose max-w-none text-gray-900">
-                        {secondResults.map((result, index) => (
-                          <div key={index} dangerouslySetInnerHTML={{ __html: markdownToHtml(result.content as string) }} />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-gray-500">검색 결과가 없습니다.</p>
-                      </div>
-                    )}
+                {/* 두 번째 API 결과 섹션: 통합 검색일 때만 노출 */}
+                {integratedMode && (
+                  <div className="mb-16">
+                    <h2 className="text-center text-xl font-bold text-gray-800 mt-8 mb-4">AI 기업 리서치 결과</h2>
+                    <p className="text-center text-sm text-gray-500 -mt-2 mb-4">기업에 따라 1~2분 가량 소요될 수 있습니다.</p>
+                    <div className="w-full max-w-7xl mx-auto mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                      {secondIsLoading ? (
+                        <Spinner />
+                      ) : secondResults.length > 0 ? (
+                        <div className="prose max-w-none text-gray-900">
+                          {secondResults.map((result, index) => (
+                            <div key={index} dangerouslySetInnerHTML={{ __html: markdownToHtml(result.content as string) }} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-gray-500">검색 결과가 없습니다.</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             )}
 

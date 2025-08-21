@@ -4,10 +4,11 @@ import { useState, useRef, KeyboardEvent } from 'react';
 
 interface SearchFormProps {
   onSearch: (searchParams: { corporationName: string; representativeName: string; /* corporationNumber: string; */ }) => void;
+  onSearchAI: (searchParams: { corporationName: string; representativeName: string; /* corporationNumber: string; */ }) => void;
   isSearching: boolean; // 두 검색 API 모두 완료될 때까지 검색을 비활성화하는 통합 플래그
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ onSearch, onSearchAI, isSearching }) => {
   const [corporationName, setCorporationName] = useState('');
   const [representativeName, setRepresentativeName] = useState('');
   // const [corporationNumber, setCorporationNumber] = useState('');
@@ -29,6 +30,17 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching }) => {
 
     setError('');
     onSearch({ corporationName, representativeName, /* corporationNumber */ });
+  };
+
+  const handleSearchAI = () => {
+    // 동일한 유효성 검사를 적용합니다.
+    if (corporationName.trim() === '' && representativeName.trim() === '') {
+      setError('업체명 또는 대표자명 중 하나 이상을 입력해야 합니다.');
+      return;
+    }
+
+    setError('');
+    onSearchAI({ corporationName, representativeName, /* corporationNumber */ });
   };
 
   // Enter 키를 눌렀을 때의 동작을 처리하는 함수입니다.
@@ -94,6 +106,13 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching }) => {
         className="w-full mt-6 bg-cyan-500 text-white font-semibold py-2.5 rounded-lg hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {isSearching ? '검색 중...' : '검색'}
+      </button>
+      <button
+        onClick={handleSearchAI}
+        disabled={isSearching}
+        className="w-full mt-3 bg-gray-800 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-opacity-50 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        {isSearching ? 'AI 리서치 중...' : 'AI 리서치'}
       </button>
     </div>
   );
