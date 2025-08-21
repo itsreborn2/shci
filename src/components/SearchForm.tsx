@@ -105,7 +105,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, onSearchAI, isSearchi
         disabled={isSearching} // isLoading 대신 isSearching 사용
         className="w-full mt-6 bg-cyan-500 text-white font-semibold py-2.5 rounded-lg hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {isSearching ? '검색 중...' : '검색'}
+        {isSearching ? '검색 중...' : '지자체 수주 검색'}
       </button>
       <button
         onClick={handleSearchAI}
@@ -114,6 +114,10 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, onSearchAI, isSearchi
       >
         {isSearching ? 'AI 리서치 중...' : 'AI 리서치'}
       </button>
+      {/* 안내 문구: 사용자 흐름을 명확히 하기 위해 작은 텍스트로 표시 */}
+      <p className="mt-2 text-xs text-gray-500 text-center">
+        지자체 수주 검색 이후 AI리서치 검색을 진행하세요.
+      </p>
     </div>
   );
 };

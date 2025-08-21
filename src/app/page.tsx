@@ -286,7 +286,8 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-gray-50">
       <div className="w-full max-w-7xl relative">
-        <Link href="/board" className="absolute top-4 right-4 bg-slate-500 text-white px-3 py-1.5 rounded-lg shadow-md hover:bg-slate-600 transition-colors text-sm font-semibold z-10">
+        {/* 모바일(작은 화면)에서는 숨기고, sm 이상에서만 표시 */}
+        <Link href="/board" className="hidden sm:inline-flex absolute top-4 right-4 bg-slate-500 text-white px-3 py-1.5 rounded-lg shadow-md hover:bg-slate-600 transition-colors text-sm font-semibold z-10">
           건의/오류 게시판
         </Link>
       

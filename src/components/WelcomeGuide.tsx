@@ -19,7 +19,7 @@ const GuideCard = ({ imgSrc, title, description, index }: { imgSrc: string; titl
           />
       </div>
       <div className="p-6">
-        <p className="text-gray-700 leading-relaxed">{description}</p>
+        <p className="text-gray-700 leading-relaxed whitespace-pre-line">{description}</p>
       </div>
     </div>
   );
@@ -29,8 +29,8 @@ const WelcomeGuide = () => {
   const guides = [
     {
       imgSrc: '/images/guide-search.png',
-      title: '1. 채무자 정보 검색',
-      description: '법인명과 대표자명을 입력해야 검색이 시작됩니다. 입력 후 엔터키를 누르면 다음 입력칸으로 이동되고, 대표자명 입력 후 엔터를 누르면 바로 검색이 진행됩니다.',
+      title: '1. 지자체 수주 검색',
+      description: '법인명과 대표자명을 입력해야 검색이 시작됩니다. 입력 후 엔터키를 누르면 다음 입력칸으로 이동되고, 대표자명 입력 후 엔터를 누르면 바로 검색이 진행됩니다.\n지자체 수주 검색 이후 AI 리서치 검색을 진행하세요.',
     },
     {
       imgSrc: '/images/guide-ongoing.png',
@@ -42,16 +42,22 @@ const WelcomeGuide = () => {
       title: '3. 완료된 수주 검색 결과',
       description: '오늘 날짜 기준으로 이미 공사가 완료된 기록입니다. 1년 이내의 기록을 보여주며, 기록이 많을수록 활발한 사업 영위를 의미합니다.',
     },
+    // 새 4번 섹션: AI 리서치 (버튼 안내)
+    {
+      imgSrc: '/images/guide-search (2).png',
+      title: '4. AI 리서치',
+      description: '지자체 수주 검색 이후 AI 리서치 버튼을 누르세요.',
+    },
     {
       imgSrc: '/images/guide-research.png',
-      title: '4. AI 기업 리서치 결과',
+      title: '5. AI 리서치 결과',
       description: '법인명과 대표자명으로 AI 리서치를 진행한 결과로, 회사에 대한 전반적인 정보를 보여줍니다. (기업에 따라 1~2분 가량 소요될 수 있습니다.)',
     },
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto mt-8 mb-16 px-4">
-      <div className="text-center mb-10">
+    <div className="w-full max-w-7xl mx-auto mt-10 mb-16 px-4">
+      <div className="text-center mt-6 mb-10">
         <h2 className="text-2xl font-bold text-gray-800">사용 가이드</h2>
         <p className="text-gray-500 mt-2">검색을 시작하기 전, 각 결과 섹션의 의미를 확인해보세요.</p>
       </div>
